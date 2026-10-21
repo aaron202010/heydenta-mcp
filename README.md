@@ -47,13 +47,33 @@ Claude Desktop or Claude Code config:
 
 Optional: `HEYDENTA_BASE_URL` (default `https://app.heydenta.com`), `HEYDENTA_MCP_STATE` (idempotency file, default `~/.heydenta-mcp/bookings.json`).
 
+## Cloud runtime: HTTP entry and container
+
+`src/http.ts` serves the same four tools over Streamable HTTP (stateless, JSON responses) at `POST /mcp`, gated by a bearer in `MCP_AUTH_TOKEN`, with `GET /healthz` open for probes. The `Dockerfile` builds a Node 22 image with the AWS Lambda Web Adapter copied in, so the one image runs as a Lambda container (function URL in front, CloudWatch logs) or anywhere with `docker run -p 8080:8080`. On Lambda the idempotency file lives in `/tmp`, so it protects one warm instance; the server-side guard (same patient, same slot) is the durable layer.
+
+```sh
+docker build -t heydenta-mcp .
+docker run --rm -p 8080:8080 -e MCP_AUTH_TOKEN=... -e HEYDENTA_API_KEY=... -e HEYDENTA_CLINIC_ID=1 -e HEYDENTA_CLINIC_SLUG=... heydenta-mcp
+```
+
+MCP client config for the remote server: type `http`, url `https://<function-url>/mcp`, header `Authorization: Bearer <MCP_AUTH_TOKEN>`.
+
 ## Tests
 
 ```sh
 npm test
 ```
 
-Six tests. Four unit tests on the API client with a fake `fetch`: retry on 5xx, no retry on 4xx, give up after three network errors, bearer in the header and never in the URL. Two end to end tests that spawn the real server over stdio against a local fake HeyDenta: `tools/list` shows the four tools, then hours, slots, next slot, a booking, the same booking again (one POST reaches the API), a taken slot (error with suggestions) and a malformed time (rejected before any API call).
+Ten tests. Four unit tests on the API client with a fake `fetch`: retry on 5xx, no retry on 4xx, give up after three network errors, bearer in the header and never in the URL. Two on the slot label and date helpers. Two end to end tests that spawn the real server over stdio against a local fake HeyDenta: `tools/list` shows the four tools, then hours, slots, next slot, a booking, the same booking again (one POST reaches the API), a taken slot (error with suggestions) and a malformed time (rejected before any API call). Two on the HTTP entry: the bearer gate and a real Streamable HTTP client round trip.
+
+## Eval
+
+```sh
+OPENROUTER_API_KEY=... npm run eval            # pass rate against the stored baseline, exit 1 on regression
+OPENROUTER_API_KEY=... npm run eval -- --baseline
+```
+
+`evals/golden.json` holds 20 receptionist requests with the tool and arguments a model should pick. `evals/run.mjs` reads the live `tools/list`, asks a model through OpenRouter with tool calling, and compares. Nothing is executed against HeyDenta. The first run (gpt-5.4-mini, 11 of 20) exposed two description faults, fixed to 14 of 20 on mini and 17 of 20 on deepseek-v4-flash.
 
 ## Layout
 
