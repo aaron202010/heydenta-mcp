@@ -57,9 +57,9 @@ export function registerTools(server: McpServer, api: HeyDentaApi, store: Bookin
     {
       title: "Clinic hours and dentists",
       description:
-        "Use first when the user asks whether the clinic is open, what the hours are, or which dentists work on a day. " +
-        "Returns open or closed for that date (holidays included), the opening hours, and the list of bookable dentists with their ids. " +
-        "Does not list free slots; call list_open_slots for that.",
+        "Use only for opening hours, open or closed on a date (holidays included), or which dentists work that day. " +
+        "Returns open or closed, the opening hours and the bookable dentists with their ids. " +
+        "Never use it to find free appointment times: any question about what times or slots are available is list_open_slots.",
       inputSchema: z.object({ date: DATE.optional().describe("Date to check as YYYY-MM-DD, clinic local date (Asia/Manila). Defaults to today in Asia/Manila.") }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
@@ -76,9 +76,9 @@ export function registerTools(server: McpServer, api: HeyDentaApi, store: Bookin
   server.registerTool(
     "list_open_slots",
     {
-      title: "Open appointment slots on a date",
+      title: "Free appointment times on a date",
       description:
-        "Use when the user wants to book or asks what times are free on a specific date. " +
+        "Use when the user asks what times or slots are free or available on a specific date, or wants to book on a date without naming a time. " +
         "Returns the free start times (HH:MM, 24 hour) for that date, overall and per dentist; past times today are already removed. " +
         "An empty list with closed=false means fully booked. Call create_booking with one of these times.",
       inputSchema: z.object({ date: DATE, dentist: DENTIST }),
@@ -128,7 +128,8 @@ export function registerTools(server: McpServer, api: HeyDentaApi, store: Bookin
     {
       title: "Book an appointment",
       description:
-        "Use only after the user has given a name, a mobile number, a date and a time that list_open_slots showed as free. " +
+        "Use as soon as the user has given all four: patient name, mobile number, date and a start time. Book directly, no need to call list_open_slots first: the server checks the slot itself. " +
+        "If any of the four is missing, do not call this; ask for it (or call list_open_slots when only the time is missing). " +
         "Creates the appointment in the clinic's calendar and returns the event id and the human readable time. " +
         "Send the same idempotency_key when retrying the same request; a repeated key returns the original booking instead of a second one. " +
         "If the slot was taken in the meantime the result is an error with suggested nearby times; offer those, do not guess others.",

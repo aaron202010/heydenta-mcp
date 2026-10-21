@@ -1,0 +1,27 @@
+{
+  "today": "2026-10-21",
+  "weekday": "Wednesday",
+  "note": "Each case is a user request as a receptionist bot would hear it. expect.tool is the tool a model should call first; expect.args lists only the arguments that must match (others are free). A null tool means the model should ask the user instead of calling anything.",
+  "cases": [
+    { "id": "hours-today", "request": "Are you open today?", "expect": { "tool": "get_clinic_hours", "args": { "date": "2026-10-21" } } },
+    { "id": "hours-sunday", "request": "Open ba kayo this Sunday?", "expect": { "tool": "get_clinic_hours", "args": { "date": "2026-10-25" } } },
+    { "id": "dentists", "request": "Which dentists are in on Friday?", "expect": { "tool": "get_clinic_hours", "args": { "date": "2026-10-23" } } },
+    { "id": "slots-date", "request": "What times are free on October 24?", "expect": { "tool": "list_open_slots", "args": { "date": "2026-10-24" } } },
+    { "id": "slots-tomorrow", "request": "Any slot tomorrow afternoon?", "expect": { "tool": "list_open_slots", "args": { "date": "2026-10-22" } } },
+    { "id": "slots-dentist", "request": "Is Dr. Santos free on Thursday?", "expect": { "tool": "list_open_slots", "args": { "date": "2026-10-22" } } },
+    { "id": "soonest", "request": "What's the soonest I can come in for a cleaning?", "expect": { "tool": "find_next_open_slot", "args": {} } },
+    { "id": "next-week", "request": "Anything available next week?", "expect": { "tool": "find_next_open_slot", "args": { "from_date": "2026-10-26" } } },
+    { "id": "no-date", "request": "I need to see a dentist, my tooth hurts", "expect": { "tool": "find_next_open_slot", "args": {} } },
+    { "id": "book-complete", "request": "Book me Friday 10:30, Maria Lopez, 09171234567, cleaning", "expect": { "tool": "create_booking", "args": { "date": "2026-10-23", "time": "10:30", "patient_name": "Maria Lopez", "patient_phone": "09171234567" } } },
+    { "id": "book-24h", "request": "Please book Juan Dela Cruz, 09981112222, tomorrow at 2pm for a consultation", "expect": { "tool": "create_booking", "args": { "date": "2026-10-22", "time": "14:00", "patient_name": "Juan Dela Cruz" } } },
+    { "id": "book-missing-phone", "request": "Book me tomorrow at 9am, name is Ana Reyes", "expect": { "tool": null } },
+    { "id": "book-missing-time", "request": "Book Carlo Tan, 09170001111 for Saturday", "expect": { "tool": "list_open_slots", "args": { "date": "2026-10-24" } } },
+    { "id": "book-missing-name", "request": "Reserve 3pm Friday for me, number 09175556666", "expect": { "tool": null } },
+    { "id": "hours-not-slots", "request": "Until what time are you open on Monday?", "expect": { "tool": "get_clinic_hours", "args": { "date": "2026-10-26" } } },
+    { "id": "slots-not-hours", "request": "Give me the free times on Monday", "expect": { "tool": "list_open_slots", "args": { "date": "2026-10-26" } } },
+    { "id": "holiday", "request": "Are you open on November 1?", "expect": { "tool": "get_clinic_hours", "args": { "date": "2026-11-01" } } },
+    { "id": "taglish-book", "request": "Pa-book po ako bukas 10am, Liza Cruz, 09182223333, pasta", "expect": { "tool": "create_booking", "args": { "date": "2026-10-22", "time": "10:00", "patient_name": "Liza Cruz" } } },
+    { "id": "greeting", "request": "Hi!", "expect": { "tool": null } },
+    { "id": "price", "request": "How much is a tooth extraction?", "expect": { "tool": null } }
+  ]
+}
