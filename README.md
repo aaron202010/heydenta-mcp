@@ -56,7 +56,9 @@ docker build -t heydenta-mcp .
 docker run --rm -p 8080:8080 -e MCP_AUTH_TOKEN=... -e HEYDENTA_API_KEY=... -e HEYDENTA_CLINIC_ID=1 -e HEYDENTA_CLINIC_SLUG=... heydenta-mcp
 ```
 
-MCP client config for the remote server: type `http`, url `https://<function-url>/mcp`, header `Authorization: Bearer <MCP_AUTH_TOKEN>`.
+MCP client config for the remote server: type `http`, url `https://<endpoint>/mcp`, header `Authorization: Bearer <MCP_AUTH_TOKEN>`.
+
+Deployed 2026-10-21 to AWS Lambda (ap-southeast-2) from the image in ECR, with an API Gateway HTTP API in front. Two things learned on the way: Lambda rejects an image pushed with Docker's default provenance and SBOM attestation manifests (build with `--provenance=false --sbom=false`), and in the new AWS account experience a Lambda function URL with public auth answers 403 before the code runs, while API Gateway invoking the function as a service principal passes. Logs are in CloudWatch under `/aws/lambda/heydenta-mcp`.
 
 ## Tests
 
