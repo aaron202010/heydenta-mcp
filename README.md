@@ -75,7 +75,7 @@ OPENROUTER_API_KEY=... npm run eval            # pass rate against the stored ba
 OPENROUTER_API_KEY=... npm run eval -- --baseline
 ```
 
-`evals/golden.json` holds 20 receptionist requests with the tool and arguments a model should pick. `evals/run.mjs` reads the live `tools/list`, asks a model through OpenRouter with tool calling, and compares. Nothing is executed against HeyDenta. The first run (gpt-5.4-mini, 11 of 20) exposed two description faults, fixed to 14 of 20 on mini and 17 of 20 on deepseek-v4-flash.
+`evals/golden.json` holds 20 receptionist requests with the tool and arguments a model should pick. `evals/run.mjs` reads the live `tools/list`, asks a model through OpenRouter with tool calling, and compares. Nothing is executed against HeyDenta. The first run exposed two description faults; after the fix gpt-5.4-mini scores 14 of 20 (`evals/baseline.json`, `evals/last-run.json`).
 
 ## Layout
 
