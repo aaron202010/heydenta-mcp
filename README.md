@@ -17,7 +17,7 @@ A model asks "is the clinic open Friday, what is free, book 10:30 for Juan". The
 
 Read-only tools carry `readOnlyHint`. `create_booking` carries `idempotentHint` and a required `idempotency_key`.
 
-## The three things the posting asks about, and where they are
+## Where the hard parts live
 
 1. **Tool schemas and descriptions a model uses correctly**: `src/tools.ts`. Every description says when to use the tool, what it returns and what to do next. Every argument has a format and an example. Dates are `YYYY-MM-DD`, times `HH:MM` 24 hour, both clinic local (Asia/Manila).
 2. **Auth, retries, rate limits, idempotency behind the tools**: `src/api.ts`. The key goes in the `Authorization` header, never in a URL. Network errors, 429 and 5xx retry three times with exponential backoff; any other 4xx returns at once because a retry cannot fix a bad request. `create_booking` reuses the model's `idempotency_key` as the server-side customer id, and `src/idempotency.ts` keeps a local file of key to booking, so a retried call never posts twice.
